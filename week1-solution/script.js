@@ -1,24 +1,23 @@
 (function() {
     'use strict';
-    angular.module("myApp", []).controller("myController", myController);
-    myController.$inject = ['$scope'];
+    angular.module("LunchCheck", []).controller("LunchCheckController", LunchCheckController);
+    LunchCheckController.$inject = ['$scope'];
 
-    function myController($scope) {
-      $scope.check = function() {
-        if (!$scope.menu || $scope.menu.length === 0) {
-          $scope.msg = "Please Enter Data First";
+    function LunchCheckController($scope) {
+      $scope.checkItems = function() {
+        if (!$scope.items || $scope.items.length === 0) {
+          $scope.msg = "Please enter data first";
+
         } else {
-          var b = $scope.menu.split(',');
-          $scope.abc = b;
-          var len = b.length;
-          if (b[len - 1] === '') {
-            len = len - 1;
-            $scope.len = len;
+          var itemsList = $scope.items.split(',');
+          var numOfItems = itemsList.length;
+          if (itemsList[numOfItems - 1] === '') {
+            numOfItems = numOfItems - 1;
           }
-          if (len <= 3) {
-            $scope.msg = "Enjoy";
+          if (numOfItems <= 3) {
+            $scope.msg = "Enjoy!";
           } else {
-            $scope.msg = "Too Much!!!";
+            $scope.msg = "Too much!";
           }
         }
       };
