@@ -1,92 +1,84 @@
-(function(){
+(function () {
 'use strict';
 
 angular.module('NarrowItDownApp', [])
-.controller('NarrowItDownController',NarrowItDownController)
-.service('MenuSearchService',MenuSearchService)
-.directive('foundItems',ListItem);
+.controller('NarrowItDownController', NarrowItDownController )
+.service('MenuSearchService', MenuSearchService)
+.constant('ApiBasePath', "https://davids-restaurant.herokuapp.com")
+.directive('foundItems', FoundItemsDirective);
 
-function ListItem(){
-	var ddo = {
-			scope : {
-				found : '<',
-				onRemove : '&',
-				nothing : '<'
-			},
-			templateUrl : 'listItem.html',
-			bindToController: true,
-			controller: NarrowItDownController,
-			controllerAs: 'nid'
-	};
+function FoundItemsDirective() {
+  var ddo = {
+    templateUrl: 'MenuListItems.html',
+    scope: {
+      items: '<',
+      onRemove: '&'
+    },
+    controller: FoundItemsDirectiveController,
+    controllerAs: 'list',
+    bindToController: true
+  };
 
-	return ddo;
+  return ddo;
+}
+
+function FoundItemsDirectiveController() {
+  var list = this;
+
+  //Returns true if list is empty
+  list.checkFoundList = function () {
+	return typeof list.items !== 'undefined' && list.items.length === 0
+  };
 }
 
 NarrowItDownController.$inject = ['MenuSearchService'];
 function NarrowItDownController(MenuSearchService) {
-	var nid = this;
-	nid.name = "";
-	nid.nothing = false;
+  var narrowItCtrl = this;
+  
+  //Search action
+  narrowItCtrl.narrowItDown = function (searchTerm) {
+	//Search only when searchTerm is not empty
+	if (searchTerm) {
+		var promise = MenuSearchService.getMatchedMenuItems(searchTerm);
+		promise.then(function (response) {
+		  narrowItCtrl.found = response;
+		})
+		.catch(function (error) {
+		  console.log(error);
+		});
+	} else {
+		narrowItCtrl.found = [];
+	}
+	
+  };
+  
+   narrowItCtrl.removeItem = function (itemIndex) {
+    this.lastRemoved = "Last item removed was " + narrowItCtrl.found[itemIndex].name;	
+    narrowItCtrl.found.splice(itemIndex, 1);
+  };
 
-	nid.getMatchedMenuItems = function(){
-			if ((nid.name=="") || (nid.name == undefined)){
-				nid.nothing = true;
-			}else{
-				nid.nothing = false;
-				var promise1 = MenuSearchService.FindIt(nid.name);
-				promise1.then(function (result2){
-					//console.log(result2);
-					nid.found = result2;
-					if (nid.found.length == 0){
-						nid.nothing = true;
-					}
-				}).catch(function(error){
-						console.log("Ooops");
-				});
+}
+
+
+MenuSearchService.$inject = ['$http', 'ApiBasePath'];
+function MenuSearchService($http, ApiBasePath) {
+  var service = this;
+    service.getMatchedMenuItems = function (searchTerm) {
+	return $http({
+      method: "GET",
+      url: (ApiBasePath + "/menu_items.json")
+    }).then(function (response) {		
+		var foundItems = [];
+		var menuItemsLength = response.data.menu_items.length;		
+		for (var i = 0; i < menuItemsLength; i++) {
+			var item = response.data.menu_items[i];
+			if (item.description.indexOf(searchTerm) !== -1) {				
+				foundItems.push(item);
 			}
-	}
-
-	nid.removeItem = function(index){
-		//console.log(index);
-		nid.found.splice(index,1);
-			//var arr = MenuSearchService.getArrayOfItems();
-			//console.log(arr);
-	}
+		};
+		return foundItems;
+    });
+  };
 }
-
-
-MenuSearchService.$inject = ['$http']
-
-function MenuSearchService($http){
-	var search = this;
-
- 	search.FindIt = function(searchTerm) {
-		var response = $http({
- 			method: "GET",
-		 url: ("https://davids-restaurant.herokuapp.com/menu_items.json")
-	 }).then(function (result){
-		 var foundItems = [];
-		 var result1 = result.data;
- 	 	 for (var property in result1) {
-	 		 if (result1.hasOwnProperty(property)) {
-				 //console.log(result1[property].length);
-	 					for (var i = 0; i < result1[property].length; i++) {
- 							var line = result1[property][i].name.toUpperCase();
- 							if (line.includes(searchTerm.toUpperCase())){
- 							  	foundItems.push(line);
- 					    }
-	 				 }
-	 		 }
- 		 }
-		 return foundItems;
-	 }).catch(function(error){
-		 	 console.log("I can't access data");
-	 });
-	 return response;
- }
-
-}
-
-
 
 })();
