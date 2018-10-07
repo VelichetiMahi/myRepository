@@ -13,7 +13,7 @@ function ListItem(){
 				onRemove : '&',
 				nothing : '<'
 			},
-			templateUrl : 'week3-solution/listItem.html',
+			templateUrl : '/week3-solution/listItem.html',
 			bindToController: true,
 			controller: NarrowItDownController,
 			controllerAs: 'nid'
