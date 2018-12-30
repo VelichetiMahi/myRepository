@@ -34,7 +34,7 @@ function FoundItemsDirectiveController() {
 NarrowItDownController.$inject = ['MenuSearchService'];
 function NarrowItDownController(MenuSearchService) {
   var narrowItCtrl = this;
-  
+
   //Search action
   narrowItCtrl.narrowItDown = function (searchTerm) {
 	//Search only when searchTerm is not empty
@@ -49,11 +49,11 @@ function NarrowItDownController(MenuSearchService) {
 	} else {
 		narrowItCtrl.found = [];
 	}
-	
+
   };
-  
+
    narrowItCtrl.removeItem = function (itemIndex) {
-    this.lastRemoved = "Last item removed was " + narrowItCtrl.found[itemIndex].name;	
+    this.lastRemoved = "Last item removed was " + narrowItCtrl.found[itemIndex].name;
     narrowItCtrl.found.splice(itemIndex, 1);
   };
 
@@ -63,16 +63,18 @@ function NarrowItDownController(MenuSearchService) {
 MenuSearchService.$inject = ['$http', 'ApiBasePath'];
 function MenuSearchService($http, ApiBasePath) {
   var service = this;
+    service.lowercase = $filter('lowercase')
     service.getMatchedMenuItems = function (searchTerm) {
+      var searchTextL = service.lowercase(searchTerm)
 	return $http({
       method: "GET",
       url: (ApiBasePath + "/menu_items.json")
-    }).then(function (response) {		
+    }).then(function (response) {
 		var foundItems = [];
-		var menuItemsLength = response.data.menu_items.length;		
+		var menuItemsLength = response.data.menu_items.length;
 		for (var i = 0; i < menuItemsLength; i++) {
 			var item = response.data.menu_items[i];
-			if (item.description.indexOf(searchTerm) !== -1) {				
+			if (item.description.indexOf(searchTextL) !== -1) {
 				foundItems.push(item);
 			}
 		};
