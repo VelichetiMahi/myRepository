@@ -61,7 +61,7 @@ function NarrowItDownController(MenuSearchService) {
 
 
 MenuSearchService.$inject = ['$http','$filter','ApiBasePath'];
-function MenuSearchService($http, ApiBasePath) {
+function MenuSearchService($http,$filter,ApiBasePath) {
   var service = this;
     service.lowercase = $filter('lowercase')
     service.getMatchedMenuItems = function (searchTerm) {
